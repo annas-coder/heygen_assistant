@@ -1,75 +1,115 @@
-# React + TypeScript + Vite
+# HeyGen Interactive Avatar with Voice & Text Chat
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React application featuring HeyGen's streaming avatar with both voice and text interaction modes, built with Vite and TypeScript.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🎯 **Interactive Avatar**: Real-time streaming avatar powered by HeyGen
+- 🗣️ **Voice Mode**: Direct voice interaction with the avatar
+- ✍️ **Text Mode**: Traditional text input with avatar responses
+- 🔄 **Seamless Mode Switching**: Toggle between voice and text modes
+- 📊 **Real-time Status**: Live status updates showing conversation flow
+- 🎨 **Modern UI**: Clean, responsive interface with intuitive controls
 
-## React Compiler
+## Getting Started
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+### Prerequisites
 
-Note: This will impact Vite dev & build performances.
+- Node.js (v16 or higher)
+- npm or yarn
+- HeyGen API key
 
-## Expanding the ESLint configuration
+### Installation
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd heygen_assistant
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+2. Install dependencies:
+```bash
+npm install
 ```
+
+3. Update your HeyGen API key in `src/App.tsx`:
+```typescript
+const apiKey = "YOUR_HEYGEN_API_KEY_HERE";
+```
+
+4. Start the development server:
+```bash
+npm run dev
+```
+
+5. Open your browser and navigate to `http://localhost:5173`
+
+## Usage
+
+1. **Start Session**: Click "Start Session" to initialize the avatar
+2. **Text Mode** (default): Type your message and click "Speak" or press Enter
+3. **Voice Mode**: Click "Voice Mode" button and start speaking naturally
+4. **Status Updates**: Watch real-time status showing listening, processing, and speaking states
+5. **Mode Switching**: Toggle between modes anytime during an active session
+
+## Voice Mode Status Messages
+
+- **"Listening..."** - Avatar is listening to your voice
+- **"Processing..."** - Avatar is processing your speech
+- **"Avatar is speaking..."** - Avatar is responding
+- **"Waiting for you to speak..."** - Ready for your next input
+
+## Project Structure
+
+```
+src/
+├── App.tsx           # Main application component with avatar logic
+├── main.tsx          # React entry point
+├── HeyGenChat.tsx    # Additional chat component (if needed)
+└── assets/           # Static assets
+```
+
+## Technologies Used
+
+- **React 18** - UI framework
+- **TypeScript** - Type safety
+- **Vite** - Build tool and dev server
+- **HeyGen Streaming Avatar SDK** - Avatar functionality
+- **Modern CSS** - Styling with inline styles
+
+## API Integration
+
+This application integrates with HeyGen's Streaming Avatar API following their official documentation for voice chat integration. Key features include:
+
+- Streaming avatar initialization
+- Voice chat event handling
+- Real-time status updates
+- Proper session management
+
+## Build
+
+To build for production:
+
+```bash
+npm run build
+```
+
+The build artifacts will be stored in the `dist/` directory.
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License.
+
+## Acknowledgments
+
+- [HeyGen](https://heygen.com) for their amazing avatar technology
+- [React](https://reactjs.org/) team for the excellent framework
+- [Vite](https://vitejs.dev/) for the lightning-fast build tool
