@@ -1,0 +1,248 @@
+{
+  "name": "Avatar Scheduled Announcements",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "cron-daily-9am",
+      "name": "Daily 9 AM (Weekdays)",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [240, 200]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression", 
+              "expression": "0 17 * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "cron-daily-5pm",
+      "name": "Daily 5 PM (Weekdays)",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [240, 400]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Generate morning announcement\nconst now = new Date();\nconst day = now.toLocaleDateString('en-US', { weekday: 'long' });\nconst date = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });\n\nconst morningMessages = [\n  `Good morning! It's ${day}, ${date}. Hope you have a productive day ahead!`,\n  `Rise and shine! Welcome to ${day}. Let's make today amazing!`,\n  `Good morning! Starting ${day} with positive energy. What's on your agenda today?`,\n  `Hello there! It's a beautiful ${day} morning. Ready to tackle your goals?`\n];\n\nconst randomMessage = morningMessages[Math.floor(Math.random() * morningMessages.length)];\n\nreturn {\n  message: randomMessage,\n  type: 'morning_greeting',\n  timestamp: now.toISOString()\n};"
+      },
+      "id": "generate-morning-message",
+      "name": "Generate Morning Message",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [460, 200]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Generate evening announcement\nconst now = new Date();\nconst day = now.toLocaleDateString('en-US', { weekday: 'long' });\n\nconst eveningMessages = [\n  `Good evening! Hope you had a great ${day}. Time to wrap up and relax!`,\n  `End of ${day}! You've worked hard today. Don't forget to take a break!`,\n  `Evening time! ${day} is coming to a close. Reflect on your achievements today.`,\n  `Good evening! Another ${day} in the books. Time to unwind and recharge!`\n];\n\nconst randomMessage = eveningMessages[Math.floor(Math.random() * eveningMessages.length)];\n\nreturn {\n  message: randomMessage,\n  type: 'evening_greeting',\n  timestamp: now.toISOString()\n};"
+      },
+      "id": "generate-evening-message",
+      "name": "Generate Evening Message",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [460, 400]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3001/webhook/n8n/scheduled_message",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"message\": \"{{ $json.message }}\",\n  \"schedule_type\": \"{{ $json.type }}\",\n  \"timestamp\": \"{{ $json.timestamp }}\"\n}",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "id": "send-morning-to-avatar",
+      "name": "Send Morning to Avatar",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [680, 200]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3001/webhook/n8n/scheduled_message",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"message\": \"{{ $json.message }}\",\n  \"schedule_type\": \"{{ $json.type }}\",\n  \"timestamp\": \"{{ $json.timestamp }}\"\n}",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "id": "send-evening-to-avatar",
+      "name": "Send Evening to Avatar", 
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [680, 400]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 12 * * *"
+            }
+          ]
+        }
+      },
+      "id": "cron-noon",
+      "name": "Daily Noon",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [240, 600]
+    },
+    {
+      "parameters": {
+        "url": "https://api.openweathermap.org/data/2.5/weather",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "New York"
+            },
+            {
+              "name": "appid",
+              "value": "YOUR_WEATHER_API_KEY"
+            },
+            {
+              "name": "units",
+              "value": "metric"
+            }
+          ]
+        }
+      },
+      "id": "get-weather",
+      "name": "Get Weather",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [460, 600]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Generate weather announcement\nconst weather = $json;\nconst temp = Math.round(weather.main.temp);\nconst description = weather.weather[0].description;\nconst city = weather.name;\n\nconst weatherMessage = `Good afternoon! Here's your weather update for ${city}: It's ${temp}°C with ${description}. Perfect time for a lunch break!`;\n\nreturn {\n  message: weatherMessage,\n  type: 'weather_update',\n  temperature: temp,\n  description: description,\n  city: city,\n  timestamp: new Date().toISOString()\n};"
+      },
+      "id": "generate-weather-message",
+      "name": "Generate Weather Message",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [680, 600]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3001/webhook/n8n/scheduled_message",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"message\": \"{{ $json.message }}\",\n  \"schedule_type\": \"{{ $json.type }}\",\n  \"weather_data\": {\n    \"temperature\": \"{{ $json.temperature }}\",\n    \"description\": \"{{ $json.description }}\",\n    \"city\": \"{{ $json.city }}\"\n  },\n  \"timestamp\": \"{{ $json.timestamp }}\"\n}",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "id": "send-weather-to-avatar",
+      "name": "Send Weather to Avatar",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [900, 600]
+    }
+  ],
+  "connections": {
+    "Daily 9 AM (Weekdays)": {
+      "main": [
+        [
+          {
+            "node": "Generate Morning Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily 5 PM (Weekdays)": {
+      "main": [
+        [
+          {
+            "node": "Generate Evening Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Morning Message": {
+      "main": [
+        [
+          {
+            "node": "Send Morning to Avatar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Evening Message": {
+      "main": [
+        [
+          {
+            "node": "Send Evening to Avatar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Noon": {
+      "main": [
+        [
+          {
+            "node": "Get Weather",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Weather": {
+      "main": [
+        [
+          {
+            "node": "Generate Weather Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Weather Message": {
+      "main": [
+        [
+          {
+            "node": "Send Weather to Avatar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": ["avatar", "scheduled", "announcements", "weather"],
+  "triggerCount": 0,
+  "updatedAt": "2024-01-01T00:00:00.000Z",
+  "versionId": "1"
+}

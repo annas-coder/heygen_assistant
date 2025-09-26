@@ -1,0 +1,139 @@
+{
+  "name": "Avatar AI Chat Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "process-user-input",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-receive-input",
+      "name": "Webhook - Receive User Input",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-3.5-turbo",
+        "messages": {
+          "messageValues": [
+            {
+              "role": "system",
+              "message": "You are a helpful AI assistant speaking through a HeyGen avatar. Keep responses conversational and under 100 words."
+            },
+            {
+              "role": "user", 
+              "message": "={{ $json.user_input }}"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.7,
+          "maxTokens": 150
+        }
+      },
+      "id": "openai-process",
+      "name": "OpenAI - Process Input",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3001/webhook/n8n/chat_response",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"response_text\": \"{{ $json.choices[0].message.content }}\",\n  \"original_input\": \"{{ $('Webhook - Receive User Input').first().json.user_input }}\",\n  \"session_id\": \"{{ $('Webhook - Receive User Input').first().json.session_id }}\",\n  \"processing_time\": \"{{ $json.usage.total_tokens }}ms\",\n  \"timestamp\": \"{{ new Date().toISOString() }}\"\n}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "send-to-avatar",
+      "name": "Send Response to Avatar",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"message\": \"User input processed successfully\",\n  \"ai_response\": \"{{ $('OpenAI - Process Input').first().json.choices[0].message.content }}\",\n  \"timestamp\": \"{{ new Date().toISOString() }}\"\n}"
+      },
+      "id": "webhook-response",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "table": "avatar_conversations",
+        "columns": {
+          "columnValues": {
+            "user_input": "={{ $('Webhook - Receive User Input').first().json.user_input }}",
+            "ai_response": "={{ $('OpenAI - Process Input').first().json.choices[0].message.content }}",
+            "session_id": "={{ $('Webhook - Receive User Input').first().json.session_id }}",
+            "timestamp": "={{ new Date().toISOString() }}",
+            "tokens_used": "={{ $('OpenAI - Process Input').first().json.usage.total_tokens }}"
+          }
+        }
+      },
+      "id": "log-conversation",
+      "name": "Log Conversation",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [680, 480]
+    }
+  ],
+  "connections": {
+    "Webhook - Receive User Input": {
+      "main": [
+        [
+          {
+            "node": "OpenAI - Process Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI - Process Input": {
+      "main": [
+        [
+          {
+            "node": "Send Response to Avatar",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log Conversation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Response to Avatar": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": ["avatar", "ai", "chat", "heygen"],
+  "triggerCount": 0,
+  "updatedAt": "2024-01-01T00:00:00.000Z",
+  "versionId": "1"
+}
